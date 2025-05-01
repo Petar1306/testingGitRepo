@@ -1,158 +1,173 @@
-# UK Building Materials Calculator 🏗️
+# UK Building Materials Calculator 🏗️ (Full Version with Plastering)
 import math
 
 
 def fence_calculator():
-    """Calculate materials for fencing (British standards)"""
+    """Calculate fencing materials with post height validation"""
     print("\n🌲 Fence Calculator (UK Standards)")
     try:
         length = float(input("Enter fence length (m): "))
-        height = float(input("Enter fence height (m): "))
+        panel_height = float(input("Enter panel height (m, typically 1.2-1.8m): "))
+        post_height = float(input("Enter post height (m, typically 2.1-2.4m): "))
 
-        # Standard UK fence panel dimensions (1800mm wide)
+        # Validate heights
+        if post_height < panel_height + 0.3:
+            print("⚠️ Warning: Posts should be 300mm taller than panels")
+
+        # Calculations
         panel_width = 1.8
         panels_needed = math.ceil(length / panel_width)
-
-        # Posts every 1.8m + end posts
         posts_needed = math.ceil(length / panel_width) + 1
+        gravel_boards = math.ceil(length / 1.8) if panel_height >= 1.2 else 0
 
-        # Gravel boards (150mm height standard)
-        gravel_boards = math.ceil(length / 1.8) if height > 1.5 else 0
+        # Post concrete based on height (0.25m³ for 2.4m posts)
+        concrete_per_post = 0.25 + (post_height - 1.8) * 0.1
 
-        print(f"\n📝 Materials Required for {length}m × {height}m fence:")
-        print(f"• Fence panels (1.8m wide): {panels_needed}")
-        print(f"• Wooden posts (100×100mm): {posts_needed}")
-        print(f"• Concrete for post bases: {posts_needed * 0.025}m³")
-        if gravel_boards:
-            print(f"• Gravel boards (150mm): {gravel_boards}")
-        print(f"• Postfix concrete: {posts_needed * 20}kg")
+        print(f"\n📝 Materials for {length}m × {panel_height}m fence:")
+        print(f"• Panels (1.8m×{panel_height}m): {panels_needed}")
+        print(f"• Posts ({post_height}m): {posts_needed} (100×100mm treated)")
+        print(f"• Concrete: {posts_needed * concrete_per_post:.2f}m³")
+        print(f"• Gravel boards: {gravel_boards}" if gravel_boards else "")
+
     except ValueError:
-        print("Invalid input! Please enter numbers.")
+        print("Invalid input! Numbers only.")
 
 
 def decking_calculator():
-    """Calculate decking materials (British standards)"""
-    print("\n🪵 Decking Calculator (UK Standards)")
+    """Calculate decking materials with waste allowance"""
+    print("\n🪵 Decking Calculator")
     try:
         area = float(input("Enter decking area (m²): "))
-        board_length = float(input("Enter board length (m, typically 3.6m): "))
-        board_width = float(input("Enter board width (mm, typically 140mm): ")) / 1000
+        board_size = input("Enter board size (mm, e.g., 140x22): ").split('x')
+        board_width, board_thickness = map(float, board_size)
 
-        # Calculate boards
-        boards_needed = math.ceil(area / (board_length * board_width)) * 1.1  # +10% waste
+        # Convert to meters
+        board_area = (board_width / 1000) * 3.6  # Standard 3.6m length
+        boards_needed = math.ceil(area / board_area * 1.15)  # 15% waste
 
-        # Frame (joists at 400mm centres)
-        perimeter = math.sqrt(area) * 4  # Approximation
-        joists_needed = math.ceil(area / 0.4)  # 400mm spacing
+        # Joists at 400mm centers
+        joists_needed = math.ceil(area * 3.5)  # 3.5m per m²
 
-        print(f"\n📝 Materials Required for {area}m² decking:")
-        print(f"• Deck boards ({board_length}m × {board_width * 1000}mm): {round(boards_needed)}")
-        print(f"• Joists (400mm centres): {joists_needed} × 3.6m lengths")
-        print(f"• Frame timber: {round(perimeter)}m of 150×50mm treated timber")
-        print(f"• Screws: {round(area * 20)} (20 per m²)")
-    except ValueError:
-        print("Invalid input! Please enter numbers.")
+        print(f"\n📝 Materials for {area}m² decking:")
+        print(f"• Boards: {boards_needed} ({board_width}x{board_thickness}mm)")
+        print(f"• Joists: {joists_needed}m (47×150mm at 400mm centers)")
+        print(f"• Screws: {math.ceil(area * 25)} (25 per m²)")
+
+    except:
+        print("Invalid input! Use format like '140x22'")
 
 
 def brickwork_calculator():
-    """Calculate brickwork materials (UK standards)"""
-    print("\n🧱 Brickwork Calculator (UK Standards)")
+    """Calculate brick and mortar quantities"""
+    print("\n🧱 Brickwork Calculator")
     try:
         area = float(input("Enter wall area (m²): "))
-        brick_type = input("Standard brick size (215×102.5×65mm)? (y/n): ").lower()
+        brick_size = input("Brick size (mm, e.g., 215x102.5x65): ").split('x')
+        width, _, height = map(float, brick_size)
 
-        if brick_type == 'y':
-            bricks_per_m2 = 60  # Standard UK brick
-            mortar_per_m2 = 0.026  # m³
-        else:
-            bricks_per_m2 = float(input("Enter bricks per m²: "))
-            mortar_per_m2 = float(input("Enter mortar per m² (m³): "))
+        # Calculate bricks per m² including mortar joints
+        bricks_per_m2 = math.ceil(1 / ((width / 1000 + 0.01) * (height / 1000 + 0.01)))
+        mortar_per_m2 = 0.025  # m³
 
-        total_bricks = math.ceil(area * bricks_per_m2 * 1.05)  # +5% waste
-        total_mortar = area * mortar_per_m2
+        print(f"\n📝 Materials for {area}m² brickwork:")
+        print(f"• Bricks: {math.ceil(area * bricks_per_m2 * 1.1)} (10% waste)")
+        print(f"• Mortar: {area * mortar_per_m2:.2f}m³ (1:5 mix)")
+        print(f"• Cement: {math.ceil(area * 0.5)} bags")
+        print(f"• Sand: {area * 0.1:.2f}m³")
 
-        print(f"\n📝 Materials Required for {area}m² brickwork:")
-        print(f"• Bricks: {total_bricks} (standard UK size)")
-        print(f"• Mortar (1:5 mix): {round(total_mortar, 3)}m³")
-        print(f"• Cement: {round(total_mortar * 7)} bags")
-        print(f"• Building sand: {round(total_mortar * 0.6, 2)}m³")
-        print(f"• Plasticiser: {round(area * 0.1)}L (100ml per m²)")
-    except ValueError:
-        print("Invalid input! Please enter numbers.")
+    except:
+        print("Invalid input! Use format like '215x102.5x65'")
 
 
 def tiling_calculator():
-    """Calculate tiling materials (British standards)"""
-    print("\n🧱 Tiling Calculator (UK Standards)")
+    """Calculate tile and adhesive quantities"""
+    print("\n🧱 Tiling Calculator")
     try:
         area = float(input("Enter area to tile (m²): "))
-        tile_type = input("Tile type (floor/wall/slab): ").lower()
+        tile_type = input("Type (wall/floor/slab): ").lower()
+        tile_size = input("Tile size (mm, e.g., 300x300): ").split('x')
 
-        if tile_type == 'floor':
-            adhesive_per_m2 = 4  # kg
-            grout_per_m2 = 0.5  # kg
-        elif tile_type == 'wall':
-            adhesive_per_m2 = 3.5
-            grout_per_m2 = 0.4
-        else:  # slabs
-            adhesive_per_m2 = 6
-            grout_per_m2 = 0
+        # Different adhesives for different tile types
+        adhesive_rates = {'wall': 4, 'floor': 5, 'slab': 7}  # kg/m²
+        adhesive = adhesive_rates.get(tile_type, 5)
 
-        tile_size = input("Enter tile size (mm, e.g., 300x300): ")
-        w, h = map(float, tile_size.lower().split('x'))
-        tile_area = (w / 1000) * (h / 1000)
+        # Calculate tiles needed
+        tile_area = (float(tile_size[0]) / 1000) * (float(tile_size[1]) / 1000)
+        tiles_needed = math.ceil(area / tile_area * 1.1)  # 10% waste
 
-        tiles_needed = math.ceil(area / tile_area * 1.1)  # +10% waste
+        print(f"\n📝 Materials for {area}m² {tile_type} tiling:")
+        print(f"• Tiles: {tiles_needed} ({'x'.join(tile_size)}mm)")
+        print(f"• Adhesive: {math.ceil(area * adhesive)}kg")
+        if tile_type != 'slab':
+            print(f"• Grout: {math.ceil(area * 0.5)}kg")
 
-        print(f"\n📝 Materials Required for {area}m² {tile_type} tiling:")
-        print(f"• Tiles ({tile_size}mm): {tiles_needed}")
-        print(f"• Adhesive: {round(area * adhesive_per_m2)}kg")
-        if grout_per_m2 > 0:
-            print(f"• Grout: {round(area * grout_per_m2)}kg")
     except:
-        print("Invalid input! Format: 300x300")
+        print("Invalid input! Check your values")
 
 
 def concrete_calculator():
-    """Calculate concrete materials (UK standards)"""
-    print("\n🏗️ Concrete Calculator (UK Standards)")
+    """Calculate concrete mix materials"""
+    print("\n🏗️ Concrete Calculator")
     try:
         volume = float(input("Enter volume needed (m³): "))
-        usage = input("Usage (foundation/slab/column): ").lower()
+        mix_type = input("Mix type (foundation/slab/column): ").lower()
 
-        if usage == 'foundation':
-            mix = (1, 3, 6)  # 1:3:6 (ST2 - Gen purpose)
-            strength = "ST2 (10N/mm²)"
-        elif usage == 'slab':
-            mix = (1, 2, 4)  # 1:2:4 (ST3 - Light duty)
-            strength = "ST3 (15N/mm²)"
-        else:  # column
-            mix = (1, 1.5, 3)  # 1:1.5:3 (ST4 - Heavy duty)
-            strength = "ST4 (20N/mm²)"
+        # UK standard mixes
+        mixes = {
+            'foundation': (1, 3, 6),  # ST2
+            'slab': (1, 2, 4),  # ST3
+            'column': (1, 1.5, 3)  # ST4
+        }
+        cement, sand, gravel = mixes.get(mix_type, (1, 2, 4))
 
-        cement, sand, gravel = mix
-        total = cement + sand + gravel
-        dry_volume = volume * 1.54  # Dry mix factor
+        # Calculate materials (1.54 dry mix factor)
+        cement_volume = (cement / (cement + sand + gravel)) * volume * 1.54
+        sand_volume = (sand / (cement + sand + gravel)) * volume * 1.54
+        gravel_volume = (gravel / (cement + sand + gravel)) * volume * 1.54
 
-        print(f"\n📝 Materials for {volume}m³ {usage} ({strength}):")
-        print(f"• Cement: {round((cement / total) * dry_volume / 0.035)} bags (25kg)")
-        print(f"• Sharp sand: {round((sand / total) * dry_volume, 2)}m³")
-        print(f"• Aggregate ({'10mm' if usage == 'column' else '20mm'}): {round((gravel / total) * dry_volume, 2)}m³")
+        print(f"\n📝 Materials for {volume}m³ {mix_type} concrete:")
+        print(f"• Cement: {math.ceil(cement_volume / 0.035)} bags (25kg)")
+        print(f"• Sand: {sand_volume:.2f}m³")
+        print(f"• Aggregate: {gravel_volume:.2f}m³ ({'10mm' if mix_type == 'column' else '20mm'})")
+
     except ValueError:
-        print("Invalid input! Please enter numbers.")
+        print("Invalid input! Numbers only")
+
+
+def plastering_calculator():
+    """Calculate plastering materials"""
+    print("\n🪣 Plastering Calculator")
+    try:
+        area = float(input("Enter wall area (m²): "))
+        thickness = float(input("Enter thickness (mm, typically 12-15mm): ")) / 1000
+
+        # UK plaster mix (1:4 cement:sand)
+        volume = area * thickness
+        cement = volume * 1.54 * (1 / 5)  # 1 part cement
+        sand = volume * 1.54 * (4 / 5)  # 4 parts sand
+
+        print(f"\n📝 Materials for {area}m² plastering:")
+        print(f"• Cement: {math.ceil(cement / 0.035)} bags (25kg)")
+        print(f"• Building sand: {sand:.2f}m³")
+        print(f"• Waterproofer: {math.ceil(area * 0.1)}L (for external work)")
+
+    except ValueError:
+        print("Invalid input! Numbers only")
 
 
 def main():
-    print("🇬🇧 UK Building Materials Calculator")
-    print("1. Fencing")
-    print("2. Decking")
-    print("3. Brickwork")
-    print("4. Tiling")
-    print("5. Concrete")
-    print("6. Exit")
+    print("\n🇬🇧 UK Building Materials Calculator 🏗️")
+    print("1. Fencing Calculator")
+    print("2. Decking Calculator")
+    print("3. Brickwork Calculator")
+    print("4. Tiling Calculator")
+    print("5. Concrete Calculator")
+    print("6. Plastering Calculator")
+    print("7. Exit")
 
     while True:
-        choice = input("\nChoose task (1-6): ")
+        choice = input("\nChoose calculator (1-7): ")
+
         if choice == '1':
             fence_calculator()
         elif choice == '2':
@@ -164,10 +179,12 @@ def main():
         elif choice == '5':
             concrete_calculator()
         elif choice == '6':
-            print("Cheers for using the calculator! 🍻")
+            plastering_calculator()
+        elif choice == '7':
+            print("\nThank you for using the calculator! 👷")
             break
         else:
-            print("Invalid choice! Try 1-6")
+            print("Invalid choice! Please enter 1-7")
 
 
 if __name__ == "__main__":
