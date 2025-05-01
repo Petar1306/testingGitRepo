@@ -1,4 +1,4 @@
-# UK Building Materials Calculator 🏗️ (Full Version with Plastering)
+# UK Building Materials Calculator 🏗️
 import math
 
 
@@ -189,4 +189,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
